@@ -115,7 +115,7 @@ public class Node implements Runnable{
 							break;
 						case "ACCEPT":
 							if(msg.getClient().equals(currentOfferNode) && currentOfferCount > -1){
-								System.out.println(getPort() + ": power " + electingPower);
+								//System.out.println(getPort() + ": power " + electingPower);
 								electingPower -= currentOfferCount;
 								currentOfferCount = -1;
 								backedHost = currentOfferNode.getHost();
@@ -127,25 +127,19 @@ public class Node implements Runnable{
 							if(msg.getClient().equals(currentOfferNode) && currentOfferCount > -1){
 
 								nextOfferNode = null;
+								reffered = false;
+								choices.remove(msg.getClient());
 								
-								if(msg.getClient().getPort() == Integer.parseInt(words[2]) && msg.getClient().getHost().equals(words[1])){
-									try {
-										if(msg.getClient().getPort() == srv.getLocalPort() && msg.getClient().getHost().equals(InetAddress.getLocalHost().getHostAddress())){
-											choices.remove(msg.getClient());
-										}else{
-											for(NodeClient c : choices){
-												if(c.getPort() == Integer.parseInt(words[2]) && c.getHost().equals(words[1])){
-													nextOfferNode = c;
-													reffered = true;
-													nextOfferCount = currentOfferCount;
-													break;
-												}
-											}
-										}
-									} catch (UnknownHostException e) {
-										System.err.println(e.getLocalizedMessage());
+								
+								for(NodeClient c : choices){
+									if(c.getPort() == Integer.parseInt(words[2]) && c.getHost().equals(words[1])){
+										nextOfferNode = c;
+										reffered = true;
+										nextOfferCount = currentOfferCount;
+										break;
 									}
 								}
+								
 								if(nextOfferNode != currentOfferNode){
 									choices.remove(msg.getClient());
 								}
