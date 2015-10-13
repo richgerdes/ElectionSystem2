@@ -4,7 +4,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-
+/**
+ * 
+ * The MonitorClient class is the socket used for communication between the Monitor and the individual nodes.
+ * 
+ */
 public class MonitorClient implements Runnable{
 	
 	private Socket socket;
@@ -18,6 +22,7 @@ public class MonitorClient implements Runnable{
 	private String host;
 	private Thread thread;
 
+	//Set up the socket and all related connections
 	public MonitorClient(Socket s, Monitor monitor) throws IOException {
 		this.socket = s;
 		this.monitor = monitor;
@@ -26,10 +31,13 @@ public class MonitorClient implements Runnable{
 		this.listeningPort = Integer.parseInt(new BufferedReader(new InputStreamReader(socket.getInputStream())).readLine());
 		this.host = this.socket.getInetAddress().getHostAddress();
 		
+		//Begin thread to listen for the node
 		this.thread= new Thread(this);
 		this.thread.start();
 	}
 
+	//Listen for the node to tell the monitor if the node is the leader and/or 
+	// to send the number of messages sent by the node to the monitor to tally
 	@Override
 	public void run() {
 		try {
@@ -43,7 +51,7 @@ public class MonitorClient implements Runnable{
 					break;
 				case "MESSAGES":
 					this.msgCount = Integer.parseInt(w[1]);
-					System.out.println("MONITOR: " + this + " message count: " + this.msgCount);
+					//System.out.println("MONITOR: " + this + " message count: " + this.msgCount);
 					monitor.countMessages();
 					break;
 				}
@@ -53,11 +61,14 @@ public class MonitorClient implements Runnable{
 		}
 	}
 	
+	// Initialize the connection in case the election is started twice in one run.
+	// Notify the user that this connection has been started.
 	public void start(int nodeCount){
 		this.msgCount = -1;
 		this.send("START " + nodeCount);
 	}
 	
+	// Indicate that the connection has stopped
 	public void stop(){
 		this.send("STOP");
 	}

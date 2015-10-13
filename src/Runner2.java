@@ -1,5 +1,10 @@
 import java.io.IOException;
 
+/**
+ * 
+ * Second main method made for extra testing purposes
+ *
+ */
 
 public class Runner2 {
 	

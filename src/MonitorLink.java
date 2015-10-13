@@ -5,7 +5,11 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-
+/**
+ * 
+ * The MonitorLink class controls the actual communication between a Node and its MonitorClient
+ *
+ */
 public class MonitorLink implements Runnable {
 	
 	private Socket socket;
@@ -13,6 +17,7 @@ public class MonitorLink implements Runnable {
 	private PrintWriter out;
 	private Node node;
 
+	//Constructor to initiate the link
 	public MonitorLink(String host, int port, Node n) throws UnknownHostException, IOException {
 		this.node = n;
 		this.socket = new Socket(host, port);
@@ -20,11 +25,13 @@ public class MonitorLink implements Runnable {
 		
 		this.out.println(n.getPort());
 		
+		//Begin listening to the MonitorClient to tell the Node what actions to perform
 		this.thread = new Thread(this);
 		this.thread.start();
 		
 	}
 
+	//Read commands given from the MonitorClient to the MonitorLink to control the Node
 	@Override
 	public void run() {
 		
@@ -37,13 +44,13 @@ public class MonitorLink implements Runnable {
 				//System.out.println("<<("+ node + "): " + str);
 				String[] words = str.split(" ");
 				switch(words[0]){
-				case "START":
+				case "START": //start the election with Integer.parseInt(words[1]) peers
 					this.node.start(Integer.parseInt(words[1]));
 					break;
-				case "STOP":
+				case "STOP": //stop election
 					this.node.stop();
 					break;
-				case "CONNECT":
+				case "CONNECT": //connect to Node on given address and port number
 					this.node.connect(words[1], Integer.parseInt(words[2]));
 					break;
 				}
@@ -56,6 +63,7 @@ public class MonitorLink implements Runnable {
 		
 	}
 
+	//Report to the MonitorClient how many messages were sent by the node
 	public void reportMsgs(int i) {
 		this.send("MESSAGES " + i);
 	}
@@ -65,6 +73,7 @@ public class MonitorLink implements Runnable {
 		this.out.println(string);
 	}
 
+	//Notify MonitorClient that this Node was elected leader
 	public void leader() {
 		this.send("LEADER");
 	}
